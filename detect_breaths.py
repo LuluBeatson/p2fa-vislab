@@ -35,7 +35,7 @@ def alignment_with_breaths(speech_file, alignment_file, out_alignment_file=None)
                 continue
             # print "pause", pause_idx-1, "start:", start, "end", end
             # print "len", end - start
-            print "Creating pause", start, end - start
+            print("Creating pause", start, end - start)
             seg = Segment(speech, 0.0, start, end - start)
             comp.add_segment(seg)
             comp.export(
@@ -45,8 +45,8 @@ def alignment_with_breaths(speech_file, alignment_file, out_alignment_file=None)
                 filetype='wav',
                 samplerate=speech.samplerate,
                 separate_tracks=False)
-            print "# classifying p%06d.wav" % pause_idx
-            print "# segment length:", x["end"] - x["start"]
+            print("# classifying p%06d.wav" % pause_idx)
+            print("# segment length:", x["end"] - x["start"])
             
             cls = classify_htk(
                 'tmpaudio/p%06d.wav' % pause_idx)
@@ -105,9 +105,9 @@ def classify_htk(audio_file):
         match = ac_re.search(res.read())
         if match:
             ac = int(match.group(1))
-            print "Ac:", ac
+            print("Ac:", ac)
             if ac > MIN_AC:
-                print "Breath!"
+                print("Breath!")
     
                 with open(output, 'r') as out:
                     words = json.load(out)["words"]
@@ -115,7 +115,7 @@ def classify_htk(audio_file):
                         lambda x: x["alignedWord"] == "{BR}",
                         words)[0]
                     breath_dur = breath["end"] - breath["start"]
-                    print "breath len", breath_dur
+                    print("breath len", breath_dur)
                     if breath_dur > MIN_BREATH_DUR:
                         final_words = words
                         final_words[0]["start"] = 0.0

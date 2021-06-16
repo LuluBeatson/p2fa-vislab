@@ -14,6 +14,7 @@ import os
 import shutil
 import wave
 import re
+
 try:
     import simplejson as json
 except:
@@ -45,7 +46,7 @@ def prep_wav(orig_wav, out_wav, sr_override, sr_models, wave_start, wave_end):
         f = wave.open(out_wav, 'r')
         SR = f.getframerate()
         f.close()
-        print "Already re-sampled the wav file to " + str(SR)
+        print("Already re-sampled the wav file to ", str(SR))
         return SR
 
     f = wave.open(orig_wav, 'r')
@@ -63,9 +64,9 @@ def prep_wav(orig_wav, out_wav, sr_override, sr_models, wave_start, wave_end):
         if sr_override != None :
             new_sr = sr_override
         
-        print "Resampling wav file from " + str(SR) + " to " + str(new_sr) + soxopts + "..."
+        print("Resampling wav file from " + str(SR) + " to " + str(new_sr) + soxopts + "...")
         SR = new_sr
-        print "sox " + orig_wav + " -r " + str(SR) + " " + out_wav + "" + soxopts
+        print("sox " + orig_wav + " -r " + str(SR) + " " + out_wav + "" + soxopts)
         os.system("sox " + orig_wav + " -r " + str(SR) + " " + out_wav + "" + soxopts)
     else:
         # os.system("cp -f " + orig_wav + " " + out_wav)
@@ -100,9 +101,9 @@ def prep_mlf(trsfile, mlffile, word_dictionary, surround, between,
         # make sure this is a valid transcript
         try:
             jsonschema.validate(dialog, TRANSCRIPT_SCHEMA)
-        except jsonschema.ValidationError, e:
-            print "Input transcript file is not in the proper format.\nSee alignment-schemas/transcript_schema.json or https://github.com/srubin/p2fa-steve"
-            raise e
+        except jsonschema.ValidationError:
+            print("Input transcript file is not in the proper format.\nSee alignment-schemas/transcript_schema.json or https://github.com/srubin/p2fa-steve")
+            raise
 
         lines = [dl["line"] for dl in dialog]
         speakers = [dl["speaker"] for dl in dialog]
@@ -171,7 +172,7 @@ def prep_mlf(trsfile, mlffile, word_dictionary, surround, between,
             # print new_up_wrd
             for wrd2 in new_up_wrd:
                 if (wrd2 not in dictionary) and (wrd2 not in dict_tmp):
-                    print wrd2
+                    print(wrd2)
                     try:
                         if wrd2[-1] in ['s', 'S']:
                             twrd2 = int(wrd2[:-1])
@@ -206,26 +207,26 @@ def prep_mlf(trsfile, mlffile, word_dictionary, surround, between,
                                 dict_tmp[wrd2] = year1pr + ' ' + yearprs[extraword][1] + ' ' + year2pr
                             else:
                                 dict_tmp[wrd2] = year1pr + ' ' + year2pr
-                            print wrd2, dict_tmp[wrd2]
+                            print(wrd2, dict_tmp[wrd2])
 
                         else:
                             num2wrd = num2wrd.upper()
                             num2wrd = num2wrd.replace('-', ' ')
                             num2wrd = num2wrd.replace(',', '')
                             num2wrd = num2wrd.replace(' ', '')
-                            print num2wrd
+                            print(num2wrd)
                             # import pdb; pdb.set_trace()
                             pr = Pronounce(words=[num2wrd]).p(add_fake_stress=True)
                             prn = pr[num2wrd][1]
                             if wrd2[-1] in ['s', 'S']:
                                 prn += ' S'
                             dict_tmp[wrd2] = prn
-                            print prn
+                            print(prn)
                     except:
                         # print "###", e
                         pr = Pronounce(words=[wrd2]).p(add_fake_stress=True)
                         dict_tmp[pr[wrd2][0]] = pr[wrd2][1]
-                        print pr
+                        print(pr)
 
                 words.append(wrd2)
                 gwm_entry.append(wrd2)
@@ -311,7 +312,7 @@ def readAlignedMLF(mlffile, SR, wave_start):
             
     j = 2
     ret = []
-    while (lines[j] <> '.'):
+    while (lines[j] != '.'):
         if (len(lines[j].split()) == 5): # Is this the start of a word; do we have a word label?
             # Make a new word list in ret and put the word label at the beginning
             wrd = lines[j].split()[4]
@@ -366,7 +367,7 @@ def writeJSON(outfile, word_alignments, phonemes=False):
         # if wrds[k][0] == "sp":
         #     continue
         
-        print wrds[total_word_idx], global_word_map[real_word_count]
+        print(wrds[total_word_idx], global_word_map[real_word_count])
         
         if wrds[total_word_idx][0] != "sp"\
             and wrds[total_word_idx][0] != "{BR}":
@@ -475,9 +476,9 @@ def writeJSON(outfile, word_alignments, phonemes=False):
     
     try:
         jsonschema.validate(out_dict, ALIGNMENT_SCHEMA)
-    except jsonschema.ValidationError, e:
-        print "Output is not a valid Alignment according to alignment-schemas/alignment_schema.json"
-        print e
+    except jsonschema.ValidationError(e):
+        print("Output is not a valid Alignment according to alignment-schemas/alignment_schema.json")
+        print(e)
         pass
 
     with open(outfile, "w") as f_out:
@@ -585,7 +586,7 @@ def create_plp(hcopy_config) :
     
 def viterbi(input_mlf, word_dictionary, output_mlf, phoneset, hmmdir) :
     command = 'HVite -T 1 -a -m -I ' + input_mlf + ' -H ' + hmmdir + '/macros -H ' + hmmdir + '/hmmdefs  -S tmp/test.scp -i ' + output_mlf + ' -p 0.0 -s 5.0 ' + word_dictionary + ' ' + phoneset + ' > tmp/aligned.results'
-    print command
+    print(command)
     # command = 'HVite -T 1 -a -m -I ' + input_mlf + ' -H ' + hmmdir + '/macros -H ' + hmmdir + '/hmmdefs  -S ./tmp/test.scp -i ' + output_mlf + ' -p 0.0 -s 5.0 ' + word_dictionary + ' ' + phoneset
     os.system(command)
     
@@ -644,7 +645,7 @@ def do_alignment(wavfile, trsfile, outfile,
         sr_models = [8000, 11025, 16000]
     
     if sr_override != None and sr_models != None and not sr_override in sr_models :
-        raise ValueError, "invalid sample rate: not an acoustic model available"
+        raise ValueError("invalid sample rate: not an acoustic model available")
 
     word_dictionary = "tmp/dict"
     input_mlf = 'tmp/tmp.mlf'
